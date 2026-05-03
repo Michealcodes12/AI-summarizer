@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 export default function Popup() {
-  // State to handle the UI text and loading spinner logic
+  // State to handle the UI text and loading spinner logic and title of the page
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState("");
@@ -20,6 +20,12 @@ export default function Popup() {
       });
   }, []);
 
+  const handleResetButton = () => {
+    setStatus("");
+    setIsLoading(false);
+  };
+
+  // This function is triggered when the user clicks the "Summarize Page" button
   const handleSummarize = async () => {
     setIsLoading(true);
     setStatus("Extracting text from page...");
@@ -40,20 +46,21 @@ export default function Popup() {
 
       // Handle the response sent back from the content script
       if (response && response.success) {
-        setStatus(
-          `Extraction successful! Found ${response.content.length} characters.`,
-        );
-        console.log("Extracted text:", response.content);
-      } else {
-        setStatus(
-          "Failed to extract text: " + (response?.error || "Unknown error"),
-        );
+        const SummaryResponse = await chrome.runtime.sendMessage({
+          action: "SUMMARIZE_TEXT",
+          text: response.content,
+        });
+
+        if (SummaryResponse && SummaryResponse.success) {
+          setStatus(SummaryResponse.summary);
+        } else {
+          setStatus(SummaryResponse?.error || "AI processing failed.");
+        }
       }
-    } catch (error) {
+    } catch {
       setStatus(
         "Error: Could not connect to content script. Try refreshing the webpage.",
       );
-      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -83,6 +90,7 @@ export default function Popup() {
           <>
             {status ? (
               <button
+                onClick={handleResetButton}
                 className={` text-white font-semibold py-2 px-4  rounded transition-colors mb-4 ${"bg-red-500 hover:bg-red-700"}`}
               >
                 Reset
