@@ -1,0 +1,29 @@
+{
+    "manifest_version": 3,
+    "name": "AI Page Summarizer",
+    "version": "1.0.0",
+    "description": "Extracts and summarizes article content using AI.",
+    "action": {
+        "default_popup": "index.html",
+        "default_title": "Summarize Page"
+    },
+    "background": {
+        "service_worker": "src/background/main.ts",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
+            "js": [
+                "src/content/main.ts"
+            ]
+        }
+    ],
+    "permissions": [
+        "activeTab",
+        "storage"
+    ]
+}
