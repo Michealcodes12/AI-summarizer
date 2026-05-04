@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import { getCachedSummary, saveSummaryToCache } from "../utils/storage";
 export default function Popup() {
   // State to handle the UI text and loading spinner logic and title of the page
   const [status, setStatus] = useState("");
@@ -28,7 +29,7 @@ export default function Popup() {
   // This function is triggered when the user clicks the "Summarize Page" button
   const handleSummarize = async () => {
     setIsLoading(true);
-    setStatus("Extracting text from page...");
+    setStatus("Summarizing...");
 
     try {
       //  Find the active tab that the user is currently looking at
@@ -38,6 +39,18 @@ export default function Popup() {
       });
 
       if (!tab.id) throw new Error("Could not find active tab.");
+
+      const url = tab.url;
+      if (!url) throw new Error("Could not find active tab.");
+
+      //  this get the summary from the cache
+      const cachedSummary = await getCachedSummary(url);
+
+      if (cachedSummary) {
+        setStatus(cachedSummary);
+        setIsLoading(false);
+        return;
+      }
 
       //  Send the message to the content script injected into THAT specific tab
       const response = await chrome.tabs.sendMessage(tab.id, {
@@ -53,7 +66,7 @@ export default function Popup() {
 
         if (SummaryResponse && SummaryResponse.success) {
           setStatus(SummaryResponse.summary);
-          console.log(SummaryResponse);
+          await saveSummaryToCache(url, SummaryResponse.summary);
         } else {
           setStatus("AI processing failed.");
         }
