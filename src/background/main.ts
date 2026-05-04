@@ -13,7 +13,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       } catch (error) {
         sendResponse({
           success: false,
-          summary: `Error: ${error}`,
+          error: (error as Error).message,
         });
       }
     })();

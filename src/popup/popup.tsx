@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { getCachedSummary, saveSummaryToCache } from "../utils/storage";
+import Button from "./component/Button";
 export default function Popup() {
   // State to handle the UI text and loading spinner logic and title of the page
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // this get the title of the current page
@@ -20,15 +22,17 @@ export default function Popup() {
         }
       });
   }, []);
-
+  //  this function handles the reset of the page
   const handleResetButton = () => {
     setStatus("");
     setIsLoading(false);
+    setError(null);
   };
 
   // This function is triggered when the user clicks the "Summarize Page" button
   const handleSummarize = async () => {
     setIsLoading(true);
+    setError(null);
     setStatus("Summarizing...");
 
     try {
@@ -38,10 +42,14 @@ export default function Popup() {
         currentWindow: true,
       });
 
-      if (!tab.id) throw new Error("Could not find active tab.");
+      if (!tab.id) {
+        setError("Could not find any tab to summarize.");
+      }
 
       const url = tab.url;
-      if (!url) throw new Error("Could not find active tab.");
+      if (!url) {
+        setError("Could not get the url of the page to be summarized.");
+      }
 
       //  this get the summary from the cache
       const cachedSummary = await getCachedSummary(url);
@@ -68,13 +76,16 @@ export default function Popup() {
           setStatus(SummaryResponse.summary);
           await saveSummaryToCache(url, SummaryResponse.summary);
         } else {
-          setStatus("AI processing failed.");
+          setError(SummaryResponse?.error);
+          setStatus("");
         }
+      } else {
+        setError("Failed to extract content from the webpage.");
+        setStatus("");
       }
-    } catch {
-      setStatus(
-        "Error: Could not connect to content script. Try refreshing the webpage.",
-      );
+    } catch (error) {
+      setError((error as Error).message);
+      setStatus("");
     } finally {
       setIsLoading(false);
     }
@@ -85,6 +96,13 @@ export default function Popup() {
       <h1 className="text-2xl font-bold text-blue-800 mb-4 text-center">
         {title}
       </h1>
+
+      {error && (
+        <div className="w-full p-3 mb-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-md flex items-start shadow-sm">
+          <span className="mr-2 text-red-500 font-bold">Error:</span>
+          <p>{error}</p>
+        </div>
+      )}
 
       {/* The display area for our status or summary */}
       <div className=" whitespace-pre-wrap leading-relaxed  w-full p-4 bg-white border border-gray-200 rounded text-sm text-gray-700 min-h-[350px] max-h-[400px] overflow-y-auto mb-4">
@@ -110,24 +128,18 @@ export default function Popup() {
         ) : (
           <>
             {status ? (
-              <button
-                onClick={handleResetButton}
-                className={` text-white font-semibold py-2 px-4  rounded transition-colors mb-4 ${"bg-red-500 hover:bg-red-700"}`}
-              >
-                Reset
-              </button>
+              <Button
+                onclick={handleResetButton}
+                customStyle={"bg-red-500 hover:bg-red-700"}
+                Text="Clear"
+              />
             ) : (
-              <button
-                onClick={handleSummarize}
+              <Button
+                customStyle={"bg-blue-600 hover:bg-blue-700"}
+                onclick={handleSummarize}
+                Text={"Summarize Page"}
                 disabled={isLoading}
-                className={` text-white font-semibold py-2 px-4  rounded transition-colors mb-4 ${
-                  isLoading
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
-              >
-                Summarize Page
-              </button>
+              />
             )}
           </>
         )}
