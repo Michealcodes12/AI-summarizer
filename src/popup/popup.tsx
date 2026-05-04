@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import ReactMarkdown from "react-markdown";
 export default function Popup() {
   // State to handle the UI text and loading spinner logic and title of the page
   const [status, setStatus] = useState("");
@@ -53,8 +53,9 @@ export default function Popup() {
 
         if (SummaryResponse && SummaryResponse.success) {
           setStatus(SummaryResponse.summary);
+          console.log(SummaryResponse);
         } else {
-          setStatus(SummaryResponse?.error || "AI processing failed.");
+          setStatus("AI processing failed.");
         }
       }
     } catch {
@@ -73,9 +74,16 @@ export default function Popup() {
       </h1>
 
       {/* The display area for our status or summary */}
-      <div className="w-full p-4 bg-white border border-gray-200 rounded text-sm text-gray-700 min-h-[350px] max-h-[400px] overflow-y-auto mb-4">
-        {status || (
-          <p className="text-sm text-gray-400">
+      <div className=" whitespace-pre-wrap leading-relaxed  w-full p-4 bg-white border border-gray-200 rounded text-sm text-gray-700 min-h-[350px] max-h-[400px] overflow-y-auto mb-4">
+        {status ? (
+          status.includes("*") || status.includes("The article") ? (
+            <ReactMarkdown>{status}</ReactMarkdown>
+          ) : (
+            status
+          )
+        ) : (
+          // If status is EMPTY, do this:
+          <p className="text-sm text-gray-400 text-center mt-10">
             Click the summarize button to get a summary of the current page.
           </p>
         )}
