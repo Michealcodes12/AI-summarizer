@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { getCachedSummary, saveSummaryToCache } from "../utils/storage";
 import Button from "./component/Button";
+import CopyButton from "./component/CopyButton";
 export default function Popup() {
   // State to handle the UI text and loading spinner logic and title of the page
   const [status, setStatus] = useState("");
@@ -10,17 +11,19 @@ export default function Popup() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // this get the title of the current page
-    chrome.tabs
-      .query({
-        active: true,
-        currentWindow: true,
-      })
-      .then((tabs) => {
-        if (tabs[0]) {
-          setTitle(tabs[0].title || "");
-        }
-      });
+    (async () => {
+      // this get the title of the current page
+      await chrome.tabs
+        .query({
+          active: true,
+          currentWindow: true,
+        })
+        .then((tabs) => {
+          if (tabs[0]) {
+            setTitle(tabs[0].title || "");
+          }
+        });
+    })();
   }, []);
   //  this function handles the reset of the page
   const handleResetButton = () => {
@@ -126,13 +129,16 @@ export default function Popup() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <>
+          <div className="flex items-center justify-end  gap-2">
             {status ? (
-              <Button
-                onclick={handleResetButton}
-                customStyle={"bg-red-500 hover:bg-red-700"}
-                Text="Clear"
-              />
+              <>
+                <Button
+                  onclick={handleResetButton}
+                  customStyle={"bg-red-500 hover:bg-red-700"}
+                  Text="Clear"
+                />
+                <CopyButton text={status} />
+              </>
             ) : (
               <Button
                 customStyle={"bg-blue-600 hover:bg-blue-700"}
@@ -141,7 +147,7 @@ export default function Popup() {
                 disabled={isLoading}
               />
             )}
-          </>
+          </div>
         )}
       </div>
     </div>
