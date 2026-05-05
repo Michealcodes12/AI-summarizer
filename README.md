@@ -2,45 +2,21 @@
 
 A lightweight, lightning-fast Chrome extension that extracts text from any web page and generates a concise, highly readable summary using Google's Gemini AI. Built with React, TypeScript, Vite, and Tailwind CSS.
 
-## Setup Instructions
+# SET UP INSTRUCTION
 
-Follow these steps to run the extension locally:
+click on the link : https://github.com/Michealcodes12/AI-summarizer/releases/tag/v1.0
 
-### 1. Prerequisites
+Download the ai-summarizer.zip file attached to the release.
 
-- Node.js (v16 or higher)
-- npm or yarn installed
-- A Google Gemini API Key (Get one from Google AI Studio)
+Unzip the file to a folder on your computer.
 
-### 2. Installation
+Open Google Chrome and navigate to chrome://extensions/.
 
-Clone the repository and install the dependencies:
+Toggle on Developer mode in the top right corner.
 
-```bash
-git clone <your-repo-url>
-cd <your-project-folder>
-npm install
-```
+Click Load unpacked and select the unzipped folder.
 
-Create a .env file in the root of your project and add your Gemini API key:
-
-```bash
-VITE_GEMINI_API_KEY=your_api_key_here
-```
-
-Start the Vite development server:
-
-```bash
-npm run dev
-```
-
-Then you can open chrome and do the following:
-
-1. Type `chrome://extensions` in the address bar and press Enter
-2. Enable "Developer mode" (toggle switch, top right)
-3. Click "Load unpacked"
-4. Navigate to your project folder and select the `dist` folder
-5. Click "Select"
+Pin the extension to your toolbar, navigate to any article, and click the icon to test!
 
 ## Architecture Explanation
 
