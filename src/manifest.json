@@ -8,7 +8,7 @@
         "default_title": "Summarize Page"
     },
     "background": {
-        "service_worker": "src/background/main.ts",
+        "service_worker": "src/background/background.ts",
         "type": "module"
     },
     "content_scripts": [
@@ -18,7 +18,7 @@
                 "https://*/*"
             ],
             "js": [
-                "src/content/main.ts"
+                "src/content/content.ts"
             ]
         }
     ],
