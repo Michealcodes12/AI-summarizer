@@ -1,6 +1,6 @@
 import { generateSummary } from "./ai-provider";
 
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
   if (request.action === "SUMMARIZE_TEXT") {
     (async () => {
       try {

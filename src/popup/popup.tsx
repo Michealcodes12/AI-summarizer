@@ -55,36 +55,37 @@ export default function Popup() {
       }
 
       //  this get the summary from the cache
-      const cachedSummary = await getCachedSummary(url);
+      const cachedSummary = await getCachedSummary(url!);
 
       if (cachedSummary) {
         setStatus(cachedSummary);
         setIsLoading(false);
         return;
       }
-
-      //  Send the message to the content script injected into THAT specific tab
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        action: "EXTRACT_CONTENT",
-      });
-
-      // Handle the response sent back from the content script
-      if (response && response.success) {
-        const SummaryResponse = await chrome.runtime.sendMessage({
-          action: "SUMMARIZE_TEXT",
-          text: response.content,
+      if (tab.id) {
+        //  Send the message to the content script injected into THAT specific tab
+        const response = await chrome.tabs.sendMessage(tab.id!, {
+          action: "EXTRACT_CONTENT",
         });
 
-        if (SummaryResponse && SummaryResponse.success) {
-          setStatus(SummaryResponse.summary);
-          await saveSummaryToCache(url, SummaryResponse.summary);
+        // Handle the response sent back from the content script
+        if (response && response.success) {
+          const SummaryResponse = await chrome.runtime.sendMessage({
+            action: "SUMMARIZE_TEXT",
+            text: response.content,
+          });
+
+          if (SummaryResponse && SummaryResponse.success) {
+            setStatus(SummaryResponse.summary);
+            await saveSummaryToCache(url!, SummaryResponse.summary!);
+          } else {
+            setError(SummaryResponse?.error);
+            setStatus("");
+          }
         } else {
-          setError(SummaryResponse?.error);
+          setError("Failed to extract content from the webpage.");
           setStatus("");
         }
-      } else {
-        setError("Failed to extract content from the webpage.");
-        setStatus("");
       }
     } catch (error) {
       setError((error as Error).message);

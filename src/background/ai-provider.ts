@@ -21,21 +21,30 @@ export async function generateSummary(text: string): Promise<string> {
     });
     const responseText = result.text;
 
-    if (responseText.length > 0) {
-      return responseText;
-    } else {
-      throw new Error("Failed to generate summary");
+    if (responseText) {
+      if (responseText.length > 0) {
+        return responseText;
+      } else {
+        throw new Error("Failed to generate summary");
+      }
     }
   } catch (error) {
-    if (error instanceof Error && error.message.includes("Failed to fetch")) {
-      throw new Error("Network error: Please check your internet connection.", {
-        cause: error,
-      });
+    if (error instanceof Error) {
+      if (error.message.includes("Failed to fetch")) {
+        throw new Error(
+          "Network error: Please check your internet connection.",
+          {
+            cause: error,
+          },
+        );
+      }
+      const match = error.message?.match(/"message":\s*"([^"]+)"/);
+      const cleanMessage = match
+        ? match[1]
+        : "An unexpected API error occurred.";
+
+      throw new Error(`API Error: ${cleanMessage},`, { cause: error });
     }
-
-    const match = error.message?.match(/"message":\s*"([^"]+)"/);
-    const cleanMessage = match ? match[1] : "An unexpected API error occurred.";
-
-    throw new Error(`API Error: ${cleanMessage},`, { cause: error });
   }
+  throw new Error("An unexpected error occurred while generating summary");
 }
